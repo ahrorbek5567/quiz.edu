@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>EduTest</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="shortcut icon" href="photo_2025-07-05_20-39-38.jpg" type="image/x-icon">
+  <style>
+    body { padding: 40px; background: #f9f9f9; }
+    .question { margin-bottom: 20px; }
+    .result { font-size: 1.2rem; font-weight: bold; }
+    #timer { font-size: 1.5rem; font-weight: bold; color: darkred; }
+    #resetBtn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    body {
+  background-image: url('360_F_439133763_FrLdhZsd5aGC23r9ATARuKJBr8ifZjIe.jpg'); /* rasmingizni joylashtiring */
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  color: white;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container" id="mainContent">
+    <h2 class="mb-3">EduTest - Random Test</h2>
+    <div id="timer" class="mb-4">04:00</div>
+    <form id="quizForm"></form>
+    <div id="result" class="result mt-4"></div>
+  </div>
+
+  <button id="resetBtn">🔓 Ban ni ochish</button>
+
+  <script>
+    if (localStorage.getItem("banned") === "true") {
+      document.body.innerHTML = `
+        <h1 style="color:red; text-align:center; margin-top:20%;">Testdan chiqarildingiz ❌</h1>
+        <button id="resetBtn" style="display:none; position:fixed; bottom:20px; right:20px; z-index:9999;">🔓 Ban ni ochish</button>
+      `;
+
+      let holdTimer;
+      document.addEventListener('mousedown', () => {
+        holdTimer = setTimeout(() => {
+          document.getElementById('resetBtn').style.display = "block";
+        }, 3000);
+      });
+      document.addEventListener('mouseup', () => clearTimeout(holdTimer));
+
+      document.addEventListener('click', (e) => {
+        if (e.target.id === 'resetBtn') {
+          localStorage.removeItem("banned");
+          alert("✅ Ban olib tashlandi!");
+          window.location.reload();
+        }
+      });
+
+    } else {
+      let warnCount = 0;
+      window.onblur = function () {
+        warnCount++;
+        if (warnCount <= 3) {
+          alert("❗️ Diqqat! Sahifani tark etdingiz. Qolgan urinishlar: " + (3 - warnCount));
+        }
+        if (warnCount >= 3) {
+          localStorage.setItem("banned", "true");
+          window.location.reload();
+        }
+      };
+
+      document.addEventListener('keydown', function (e) {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+          (e.ctrlKey && e.key === 'u')
+        ) {
+          e.preventDefault();
+          alert("Kodlar himoyalangan ❌");
+        }
+        if (e.key === 'PrintScreen') {
+          alert("❌ Skrinshot olish taqiqlangan!");
+          document.body.style.filter = "blur(15px)";
+          setTimeout(() => document.body.style.filter = "none", 3000);
+        }
+        if ((e.ctrlKey && (e.key === 'c' || e.key === 'x'))) {
+          e.preventDefault();
+          alert("Bu amal taqiqlangan ❌");
+        }
+      });
+
+      document.addEventListener('contextmenu', e => e.preventDefault());
+
+      const questions = [
+        {
+          q: "HTMLda eng katta sarlavha tegini belgilang:",
+          options: { a: "&lt;h6&gt;", b: "&lt;h1&gt;", c: "&lt;title&gt;" },
+          correct: "b"
+        },
+        {
+          q: "CSS nima uchun ishlatiladi?",
+          options: { a: "Ma'lumot saqlash", b: "Veb sahifani bezatish", c: "Kiritmani tekshirish" },
+          correct: "b"
+        },
+        {
+          q: "HTMLda link yaratish tegi:",
+          options: { a: "&lt;img&gt;", b: "&lt;link&gt;", c: "&lt;a&gt;" },
+          correct: "c"
+        },
+        {
+          q: "CSSda rang berish xossasi:",
+          options: { a: "font-size", b: "color", c: "background-size" },
+          correct: "b"
+        },
+        {
+          q: "HTMLda rasm chiqarish tegi:",
+          options: { a: "&lt;src&gt;", b: "&lt;image&gt;", c: "&lt;img&gt;" },
+          correct: "c"
+        },
+        {
+          q: "CSSda tashqi fayl ulash tegi:",
+          options: { a: "&lt;script&gt;", b: "&lt;style&gt;", c: "&lt;link&gt;" },
+          correct: "c"
+        },
+        {
+          q: "CSSda blokni markazga keltirish:",
+          options: { a: "margin: auto;", b: "text-align: center;", c: "float: center;" },
+          correct: "a"
+        },
+        {
+          q: "CSSda matnni qalin qilish:",
+          options: { a: "font-weight", b: "font-style", c: "text-transform" },
+          correct: "a"
+        },
+        {
+          q: "CSSda fon rangi berish:",
+          options: { a: "bg-color: red;", b: "background-color: red;", c: "color-background: red;" },
+          correct: "b"
+        },
+        {
+          q: "HTML fayl boshlanishi:",
+          options: { a: "&lt;doctype html&gt;", b: "&lt;html&gt;", c: "&lt;!DOCTYPE html&gt;" },
+          correct: "c"
+        }
+      ];
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      const form = document.getElementById('quizForm');
+      const shuffled = shuffle([...questions]);
+
+      shuffled.forEach((item, index) => {
+        const block = document.createElement('div');
+        block.classList.add('question');
+        block.innerHTML = `<p>${index + 1}. ${item.q}</p>` +
+          Object.entries(item.options).map(([key, val]) =>
+            `<div><input type="radio" name="q${index}" value="${key}"> ${val}</div>`
+          ).join('');
+        form.appendChild(block);
+      });
+
+      form.insertAdjacentHTML("beforeend", '<button type="submit" class="btn btn-primary">Natijani ko‘rish</button>');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        let score = 0;
+        shuffled.forEach((q, i) => {
+          const selected = document.querySelector(`input[name="q${i}"]:checked`);
+          if (selected && selected.value === q.correct) score++;
+        });
+        clearInterval(timerInterval);
+
+        const resultEl = document.getElementById('result');
+        if (score === shuffled.length) {
+          resultEl.innerHTML = "🎉 <b>Tabriklaymiz!</b> Siz barcha savollarga to‘g‘ri javob berdingiz! ✅";
+          confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+        } else if (score === 0) {
+          resultEl.innerHTML = "😞 Afsuski, birorta to‘g‘ri javob yo‘q.";
+        } else {
+          resultEl.textContent = "Natijangiz: " + score + " / " + shuffled.length;
+        }
+      });
+
+      let seconds = 240;
+      const timerDisplay = document.getElementById("timer");
+      const timerInterval = setInterval(() => {
+        seconds--;
+        let min = Math.floor(seconds / 60);
+        let sec = seconds % 60;
+        timerDisplay.textContent = (min < 10 ? "0" + min : min) + ":" + (sec < 10 ? "0" + sec : sec);
+        if (seconds <= 0) {
+          clearInterval(timerInterval);
+          form.dispatchEvent(new Event('submit'));
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
